@@ -1,0 +1,244 @@
+{% extends "index.html" %}
+{% load myfilter %}
+
+{% block header %}
+<nav class="d-flex justify-content-between align-items-center header-content py-3 px-4">
+    <!-- Left section (Logo & Profile) -->
+    <div class="d-flex align-items-center">
+        <h2 class="me-4 site-title">My Liveroom</h2>
+
+        <!-- Profile Section -->
+        <div class=" align-items-center profile-section"
+            style="margin-left: 2rem;">
+            <a href="/profile/"
+                class="profile-link row text-decoration-none">
+                <div class="col-auto text-center">
+                    <img src="{{request.session.pkey|Image}}"
+                        alt="Profile Picture"
+                        class="img-fluid rounded-circle"
+                        style="width: 60px; height: 60px;">
+                </div>
+                <div class="col-auto">
+                    <h5 class="profile-name mb-2">Name :
+                        {{request.session.pkey|Username|title}}</h5>
+                    <div class="profile-last-seen">Phone :
+                        {{request.session.pkey|Userphone}}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Right section (Icons & Dropdown) -->
+    <div class="d-flex align-items-center" style="gap: 10px;">
+        <a href="#" class="icon-btn border rounded-circle p-2 me-2">
+            <span class="fas fa-video"></span>
+        </a>
+        <a href="#"
+            class="icon-btn border rounded-circle p-2 me-2">
+            <span class="fas fa-phone"></span>
+        </a>
+        <div class="dropdown">
+            <button class="dropbtn border icon-btn rounded-circle p-2 ">
+                <span style="font-weight: bolder;">⋮</span>
+            </button>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="#viewcontact">View contact</a>
+                <a href="#about">Media, links, and docs</a>
+                <a href="#contact">Search</a>
+                <a href="#contact">Mute notifications</a>
+                <a href="#contact">Wallpaper</a>
+                <a href="#contact">More</a>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock header %}
+{% block main %}
+
+<!-- Add Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-2">
+    <div class="card shadow-lg p-4 rounded-3" style="max-width: 400px; margin: auto;">
+        <h3 class="text-center mb-4">Save Contact</h3>
+        <!-- Contact Form -->
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" placeholder="Enter username">
+        </div>
+        <div class="mb-3">
+            <label for="contact" class="form-label">Contact</label>
+            <input type="text" class="form-control" id="contact" name="contact" placeholder="mobile number" maxlength="10" readonly>
+        </div>
+        
+
+        <!-- Dial Pad -->
+        <div class="d-grid gap-2">
+            <!-- Row 1 -->
+            <div class="row">
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(1)">1</button></div>
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(2)">2</button></div>
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(3)">3</button></div>
+            </div>
+            <!-- Row 2 -->
+            <div class="row">
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(4)">4</button></div>
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(5)">5</button></div>
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(6)">6</button></div>
+            </div>
+            <!-- Row 3 -->
+            <div class="row">
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(7)">7</button></div>
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(8)">8</button></div>
+                <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(9)">9</button></div>
+            </div>
+            <!-- Row 4 -->
+            <div class="row">
+                
+                    <div class="col"><button class="btn btn-outline-dark w-100 py-3" onclick="inputvalue(0)">0</button></div>
+                    <div class="col"><button class="btn btn-outline-dark w-100 fs-3" onclick="resetvalue()">&times;</button></div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="text-center mt-4">
+            <button class="btn btn-primary px-5 py-2" id="save-contact">Save Contact</button>
+        </div>
+    </div>
+</div>
+
+<!-- Ensure you're loading jQuery only once -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    function inputvalue(number){
+        var val = document.querySelector("#contact").value;
+        if (val.length == 10){
+            alert("number must be 10-digits");
+            return false
+        }
+        val+=number;
+        document.querySelector("#contact").value = val;
+        //console.log(val);
+    } 
+
+    function resetvalue(){
+        var val = document.querySelector("#contact").value;
+        if (!val.length){
+            return false;
+        }
+        let newval = val.substr(0,val.length-1);
+        document.querySelector("#contact").value = newval;
+        //console.log(newval);
+    }
+
+    document.querySelector("#save-contact").addEventListener('click',function(event){
+        event.preventDefault();
+        let name = document.querySelector("#username").value;
+        if(!name.trim()){
+            alert("Contact User Name must be Required...")
+            return false;
+        }
+        let contact = document.querySelector("#contact").value;
+        if(!contact.trim() || contact.length!=10){
+            alert("mobile number empty...")
+            return false;
+        }
+        console.log(name);
+        console.log(contact);
+
+        // Get CSRF token from the meta tag
+        let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Create a FormData object to send the data as POST
+        let formData = new FormData();
+        formData.append('username', name);
+        formData.append('contact', contact);
+
+
+        var xhttpobj = new XMLHttpRequest();
+        xhttpobj.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status == 200){
+                //console.log(typeof(this.responseText))
+                let response = JSON.parse(this.responseText)
+                //console.log(typeof(response));
+                alert(response.msg);
+            } else if(this.readyState == 4 && this.status == 400){
+                //console.log(typeof(this.responseText))
+                let response = JSON.parse(this.responseText)
+                //console.log(typeof(response));
+                alert(response.msg);
+            }
+            window.location.reload();
+        }
+        //xhttpobj.open('GET',`/contact-save/?contact=${contact}&username=${name}`,true);
+        //xhttpobj.send();
+        
+        xhttpobj.open('POST', '/contact-save/', true);
+
+        // Set the CSRF token in the request header
+        xhttpobj.setRequestHeader('X-CSRFToken', csrfToken);
+        
+        // Send the form data
+        xhttpobj.send(formData);
+    });
+
+</script>
+
+<style>
+    /* Custom button styling */
+.btn-outline-dark {
+    border-radius: 50px;
+    font-size: 1rem;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-outline-dark:hover {
+    background-color: #1f0855;
+    transform: scale(1.1);
+}
+
+/* Contact form container */
+.card {
+    background-color: #fefefe;
+    border: 1px solid #ddd;
+}
+
+h3 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: #333;
+}
+
+.container {
+    padding: 20px;
+}
+
+/* Save button */
+.btn-primary {
+    border-radius: 25px;
+    font-size: 1.2rem;
+    background-color: orangered;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #061d36;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive improvements */
+@media (max-width: 576px) {
+    .btn-outline-dark {
+        font-size: 1.2rem;
+        padding: 0.6rem 0;
+    }
+
+    .btn-primary {
+        font-size: 1rem;
+    }
+}
+
+</style>
+{% endblock main %}

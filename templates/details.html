@@ -1,0 +1,130 @@
+{% load myfilter %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Details with Phone</title>
+
+        <!-- Bootstrap CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+
+        <style>
+        .profile-page {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+
+        .profile-info {
+            text-align: left;
+        }
+
+        @media (max-width: 576px) {
+            .profile-page {
+                padding: 15px;
+            }
+
+            .profile-picture {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    </style>
+
+    </head>
+
+    <body>
+        <div class="container profile-page">
+            <!-- Profile Picture Section -->
+            <div class="d-flex justify-content-center">
+                <img src="{{request.session.pkey|Image}}"
+                    alt="Profile Picture" class="profile-picture">
+            </div>
+
+            <!-- Form for Profile Upload -->
+            <form action="/submit-image/" method="post"
+                enctype="multipart/form-data" class="mt-3">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <input type="file" name="input-image" id="input-image"
+                        class="form-control" required>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-outline-success">Set
+                        Profile</button>
+                    <button type="reset"
+                        class="btn btn-outline-danger">Reset</button>
+                </div>
+            </form>
+
+            <!-- Profile Info Section -->
+            <div class="profile-info mt-4">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Name:</span>
+
+                    <input type="text" class="form-control"
+                        placeholder="Enter profile name" id="input-name" required>
+                    <!-- </form> -->
+                </div>
+            </div>
+
+            <!-- Next Button -->
+            <button class="btn btn-info w-100 mt-4"
+                id="submit-name">Next</button>
+        </div>
+
+        <!-- Bootstrap JS -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Load jQuery for Ajax -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <script>
+            document.querySelector("#submit-name").addEventListener('click', function(event){
+            event.preventDefault();  // Prevent the default form submission behavior
+            
+            let name = document.querySelector("#input-name").value.trim();  // Trim to remove whitespace from both ends
+            
+            // Check if the name is empty or contains only whitespace
+            if (!name) {
+                alert("Please enter a valid name.");
+                return false;  // Prevent further execution
+            }
+        
+                // If the name is valid, continue with the AJAX request
+                $.ajax({
+                    type: 'POST',
+                    url: '/submit-name/',
+                    data: {
+                        name: name,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response){
+                        alert(response.message);
+                        window.location.href = response.redirect_url
+                    },
+                    error: function(response){
+                        alert("An error occurred while submitting the name.");
+                    }
+                });
+            });
+        </script> 
+    </body>
+
+</html>

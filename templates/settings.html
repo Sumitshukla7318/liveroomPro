@@ -1,0 +1,169 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block header %}
+<nav class="d-flex justify-content-between align-items-center header-content">
+    <div class="d-flex align-items-center">
+        <h2 class="me-4 site-title">My Liveroom</h2>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="row align-items-center profile-section m-1">
+        <div class="col-4 col-md-2 text-center">
+            <img src="{% static 'profile_picture/abc.avif' %}"
+                alt="Profile Picture"
+                class="img-fluid rounded-circle">
+        </div>
+        <div class="col-8 col-md-10">
+            <a href="/profile/" class="profile-link text-decoration-none">
+                <h5 class="profile-name">Abc Limited</h5>
+                <div class="profile-last-seen">Profile</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Icons and Dropdown -->
+    <div class="d-flex align-items-center" style="gap: 10px;">
+        <a href="#" class="icon-btn border rounded-circle me-2">
+            <span class="bi bi-chat-left-text"></span>
+        </a>
+        <a href="/status/" class="icon-btn border rounded-circle me-2">
+            <span class="bi bi-disc"></span>
+        </a>
+        <div class="dropdown">
+            <button onclick="toggleDropdown()"
+                class="dropbtn border rounded-circle icon-btn">
+                <span class="bi bi-gear"></span>
+            </button>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="/group/">New Group</a>
+                <a href="#broadcast">New Broadcast</a>
+                <a href="#devices">Linked Devices</a>
+                <a href="#starred">Starred Messages</a>
+                <a href="#payments">Payments</a>
+                <a href="/settings/">Settings</a>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock header %}
+
+{% block main %}
+<div class="container settings-page">
+    <!-- Profile Section -->
+    <div class="profile-section">
+        <div class="profile-picture">
+            <!-- Image placeholder -->
+            <img src="{% static 'profile_picture/abc.avif' %}" alt="Profile Picture" class="img-fluid">
+        </div>
+        <div class="profile-info">
+            <div class="d-flex">
+                <span>Name:</span>
+                <span>mmmbhjd</span>
+            </div>
+            <div class="d-flex">
+                <span>Description:</span>
+                <span>mmmbhjd</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Items -->
+    <div class="menu-item">
+        <button>Account</button>
+        <span>Secure notifications, change number</span>
+    </div>
+    <div class="menu-item">
+        <button>Privacy</button>
+        <span>Block content</span>
+    </div>
+    <div class="menu-item">
+        <button>Favorites</button>
+        <span>Add, reorder, remove</span>
+    </div>
+    <div class="menu-item">
+        <button>Chats</button>
+        <span>Themes, wallpaper, chat history</span>
+    </div>
+</div>
+
+<style>
+    .settings-page {
+        max-width: 500px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .profile-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+    }
+
+    .profile-picture {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: #ddd;
+        margin-right: 15px;
+    }
+
+    .profile-info span {
+        display: block;
+        font-weight: bold;
+    }
+
+    .menu-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 10px;
+        background-color: #f1f1f1;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .menu-item:hover {
+        background-color: #e0e0e0;
+    }
+
+    .menu-item span {
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    .menu-item button {
+        background: none;
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .profile-section {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-picture {
+            margin-bottom: 10px;
+        }
+
+        .menu-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .menu-item button {
+            font-size: 18px;
+        }
+    }
+</style>
+{% endblock main %}

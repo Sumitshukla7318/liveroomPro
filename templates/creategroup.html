@@ -1,0 +1,183 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block header %}
+<header>
+    <nav class="d-flex justify-content-between align-items-center header-content p-3 bg-light shadow-sm">
+        <div class="d-flex align-items-center">
+            <h2 class="me-4">My Liveroom</h2>
+            <input type="search" class="search-input form-control" placeholder="Search...">
+        </div>
+        <div class="d-flex align-items-center">
+            <a href="#" class="border icon-btn me-2">
+                <span class="bi bi-chat-left-text"></span>
+            </a>
+            <a href="#" class="border icon-btn me-2">
+                <span class="bi bi-disc"></span>
+            </a>
+            <div class="dropdown">
+                <button onclick="toggleDropdown()" class="dropbtn border icon-btn">
+                    <span class="bi bi-gear"></span>
+                </button>
+                <div id="myDropdown" class="dropdown-content">
+                    <a href="/newgroup/">New Group</a>
+                    <a href="#about">New Broadcast</a>
+                    <a href="#contact">Linked Devices</a>
+                    <a href="#contact">Starred Messages</a>
+                    <a href="#contact">Payments</a>
+                    <a href="#contact">Settings</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+{% endblock header %}
+
+{% block main %}
+<div class="container d-flex justify-content-center mt-4">
+    <form class="card p-4 shadow-sm w-50" id="group-form">
+        <h4 class="mb-4 text-center">Create New Group</h4>
+        <div class="mb-3">
+            <label for="group-name" class="form-label">Enter Group Name:</label>
+            <input type="text" class="form-control" id="group-name" placeholder="Group Name" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Group Permission:</label>
+            <button type="button" class="btn btn-outline-danger" onclick="showPermissions()">Click</button>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Members:</label>
+            <span>2</span>
+        </div>
+        <div class="mb-3 d-flex flex-wrap gap-2">
+            <img src="{% static 'profile_picture/abc.avif' %}" alt="Profile" class="rounded-circle" style="height: 50px; width: 50px;">
+            <img src="{% static 'profile_picture/abc.avif' %}" alt="Profile" class="rounded-circle" style="height: 50px; width: 50px;">
+            <img src="{% static 'profile_picture/abc.avif' %}" alt="Profile" class="rounded-circle" style="height: 50px; width: 50px;">
+            <img src="{% static 'profile_picture/abc.avif' %}" alt="Profile" class="rounded-circle" style="height: 50px; width: 50px;">
+        </div>
+        <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary" onclick="goBack()">Back</button>
+            <button type="submit" class="btn btn-info">Create</button>
+        </div>
+    </form>
+</div>
+
+<!-- Include SweetAlert2 CSS and JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Function to handle dropdown toggle
+    function toggleDropdown() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Function to show permission toggles in a SweetAlert modal
+    function showPermissions() {
+        Swal.fire({
+            title: 'Group Permissions',
+            html: `
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="editSettings">
+                    <label class="form-check-label" for="editSettings">Edit Group Settings</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="sendMessage">
+                    <label class="form-check-label" for="sendMessage">Send Message</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="addMembers">
+                    <label class="form-check-label" for="addMembers">Add Other Members</label>
+                </div>
+            `,
+            confirmButtonText: 'Submit',
+            showCancelButton: true,
+            preConfirm: () => {
+                // Capture the state of each toggle
+                const editSettings = document.getElementById('editSettings').checked;
+                const sendMessage = document.getElementById('sendMessage').checked;
+                const addMembers = document.getElementById('addMembers').checked;
+                
+                // Return the captured data
+                return {
+                    editSettings: editSettings,
+                    sendMessage: sendMessage,
+                    addMembers: addMembers
+                };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Process the permission settings here
+                console.log('Permissions:', result.value);
+                Swal.fire('Success', 'Permissions updated successfully!', 'success');
+            }
+        });
+    }
+
+    // Function to go back
+    function goBack() {
+        window.history.back();
+    }
+
+    // Add event listener to form submission
+    document.getElementById("group-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        alert('Group Created Successfully!'); // Implement your form submission logic here
+    });
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+
+<style>
+    .icon-btn {
+        padding: 8px;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    .show {
+        display: block;
+    }
+
+    .w-50 {
+        width: 50%;
+    }
+    
+    @media (max-width: 768px) {
+        .w-50 {
+            width: 100%;
+        }
+    }
+</style>
+
+{% endblock main %}

@@ -1,0 +1,200 @@
+from django.shortcuts import render
+from django.views import View
+from django.conf import settings
+from twilio.rest import Client
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+import random
+from app1.models import Profile,Contact
+from django.views.decorators.csrf import csrf_exempt
+# Create your views here.
+
+class Login_Phonenumber_view(View):
+    def get(self,request):
+        return render(request,"login.html")
+
+class Details_view(View):
+    def get(self,request):
+        return render(request,"details.html")
+    def post(self,request):
+        pass
+    
+class Index_view(View):
+    def get(self,request):
+        if 'pkey' not in request.session:
+            return render(request,"login.html")
+        pkey = request.session.get('pkey')
+        data = Contact.objects.filter(reference = pkey).values()
+        data = list(data)
+        cnt = Contact.objects.filter(reference=pkey).values('contact')
+        people = Profile.objects.all().values('phone')
+        phn = [i['phone'] for i in people.values()]
+        cnt = [i['contact'] for i in cnt.values()]
+        # print(phn)
+        # print('l----->',cnt)
+        # print(f'c----->{people}')
+        list1 = []
+        for p in phn:
+            if p in cnt:
+                list1.append({'id':Contact.objects.get(contact=p).id, 'image': Profile.objects.get(phone=p).image})
+            else:
+                pass
+                # list1.append({'id':Contact.objects.get(contact=p), 'image': ''})            
+        print(list1)
+        return render(request,"index.html",{'index': "msg",'data': data})
+    
+    def post(self,request):
+        pass
+
+class Status_view(View):
+    def get(self,request):
+        return render(request,"status.html")
+    
+class NewGroup_view(View):
+    def get(self,request):
+        data = {'first': 1,'second': 2,'third': 3,'four': 4,'five': 5}
+        return render(request,"newgroup.html",{'contact': data})
+    
+
+class CreateGroup_view(View):
+    def get(self,request):
+        return render(request,"creategroup.html")
+    
+class Chat_Profile_view(View):
+    def get(self,request):
+        return render(request, "chat.html")
+   
+mobile = None
+
+class Request_otp(View):
+    def post(self,request):
+        self.mobile_number = request.POST.get('mobile_number')
+        # print(self.mobile_number)
+        # otp = send_otp(mobile_number)
+        otp=self.send_otp()
+        # Save the OTP in session or database for later verification
+        request.session['otp'] = otp
+        global mobile
+        mobile = self.mobile_number
+        # return JsonResponse({'message': 'OTP sent successfully'}, status=200)
+        return JsonResponse({'message': 'OTP sent successfully','otp': otp}, status=200)
+    def get(self,request):
+        return render(request,"login.html",status=200)
+    def send_otp(self):
+        try:
+            # Twilio credentials
+            # account_sid = 'your_account_sid'
+            # auth_token = 'your_auth_token'
+            #account_sid = settings.TWILIO_ACCOUNT_SID
+            #auth_token = settings.TWILIO_AUTH_TOKEN
+            #twilio_phone_number = settings.TWILIO_PHONE_NUMBER
+            # client = Client(account_sid, auth_token)
+            otp = random.randint(100000, 999999)
+            print(otp)
+            # message = f'Your OTP is {otp}'
+            # msg = client.messages.create(
+            #     body=message,
+            #     from_=twilio_phone_number,
+            #     to='+91'+self.mobile_number
+            # )
+            return otp
+        except Exception as msg:
+            print(msg)
+            
+class Check_otp(View):
+    def post(self,request):
+        try:
+            otp = request.POST.get('otp')
+            # print(otp)
+            # print(request.session['otp'])
+            if int(otp) == request.session['otp']:
+                obj = Profile(phone = mobile)
+                obj.save()
+                request.session['pkey'] = obj.id
+                del request.session['otp']
+                print(f'primary key:- {obj.id}')
+                return JsonResponse({'success':True},status=200) 
+            else:
+                return JsonResponse({'success':False},status=200)
+        except:
+            return JsonResponse({'success':False},status=404)
+
+class Personal_Profile_view(View):
+    def get(self,request):
+        return render(request,"profile.html")
+    
+class Contact_list_view(View):
+    def get(self,request):
+        return render(request,"contact_list.html")
+    
+class Contact_save_view(View):
+    def get(self, request, *args, **kwargs):
+        pass
+    def post(self, request):
+        username = request.POST.get('username')
+        contact = request.POST.get('contact')
+        prevcontact = Contact.objects.all().values('contact')
+        print(list(prevcontact))
+        for p in prevcontact:
+            if p['contact'] == contact:
+                return JsonResponse({'msg':"Contact Already Exist..."},status=200)
+        print(f'{contact} : {username}')
+        # Validate and process the form data
+        if username and contact and len(contact) == 10:
+            # Save the data or perform some action
+            try:
+                pkey = request.session.get('pkey')
+                obj1 = Profile.objects.get(id = pkey)
+                obj2 = Contact(name=username, contact=contact, reference= obj1)
+                obj2.save()
+                return JsonResponse({'msg': 'Contact saved successfully!'}, status=200)
+            except Exception as e:
+                print(f"Error: {e}")
+                return JsonResponse({'msg': 'Something went wrong'}, status=400)       
+        else:
+            return JsonResponse({'msg': 'Invalid data provided.'}, status=400)
+            
+    
+class Image_submit_view(View):
+    def post(self,request):
+        try:
+            image = request.FILES['input-image']
+            # Retrieve the existing object using the primary key from the session
+            obj = Profile.objects.get(id=request.session['pkey'])            
+            # Update the field(s) you want to modify
+            obj.image = image  # Set the new image value
+            # Save the changes to the database
+            obj.save()
+            print("Profile updated successfully!")
+            return HttpResponseRedirect('/details/')
+        except Profile.DoesNotExist:
+            print("Profile with the given ID does not exist.")
+            
+class Name_submit_view(View):
+    def post(self,request):
+        try:
+            name = request.POST.get('name')
+            # Retrieve the existing object using the primary key from the session
+            obj = Profile.objects.get(id=request.session['pkey'])
+            # Update the field(s) you want to modify
+            obj.name = name  # Set the new image value
+            # Save the changes to the database
+            obj.save()
+            print("Profile updated successfully!")
+            return JsonResponse({'redirect_url': '/','message': 'Name submitted successfully!'},status=200)
+        except Profile.DoesNotExist:
+            print("Profile with the given ID does not exist.")
+    
+class Settings_view(View):
+    def get(self,request):
+        return render(request,"settings.html")
+    
+# from .models import Contact 
+class Contact_view(View):
+    def get(self,request):
+        contact = request.GET.get('contact')
+        print("Say hii")
+        print(contact)
+        return JsonResponse({'msg':"Contact no. added successfully..."}, status=200)
+    def post(self,request):
+        print("POST confirm")
+        return HttpResponse("kndkjhdkj")

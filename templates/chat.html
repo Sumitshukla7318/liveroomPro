@@ -1,0 +1,246 @@
+{% extends "index.html" %}
+{% load myfilter %}
+{% load static %}
+
+{% block header %}
+
+    <nav class="d-flex justify-content-between align-items-center header-content py-3 px-4">
+        <!-- Left section (Logo & Profile) -->
+        <div class="d-flex align-items-center">
+            <h2 class="me-4 site-title">My Liveroom</h2>
+    
+            <!-- Profile Section -->
+            <div class="row align-items-center profile-section"
+                style="margin-left: 2rem;">
+                <a href="/profile/"
+                    class="profile-link row text-decoration-none">
+                    <div class="col-auto text-center">
+                        <img src="{{request.session.pkey|Image}}"
+                            alt="Profile Picture"
+                            class="img-fluid rounded-circle"
+                            style="width: 60px; height: 60px;">
+                    </div>
+                    <div class="col-auto">
+                        <h5 class="profile-name mb-2">Name :
+                            {{request.session.pkey|Username|title}}</h5>
+                        <div class="profile-last-seen">Phone :
+                            {{request.session.pkey|Userphone}}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    
+        <!-- Right section (Icons & Dropdown) -->
+        <div class="d-flex align-items-center" style="gap: 10px;">
+            <a href="#" class="icon-btn border rounded-circle p-2 me-2">
+                <span class="fas fa-video"></span>
+            </a>
+            <a href="#"
+                class="icon-btn border rounded-circle p-2 me-2">
+                <span class="fas fa-phone"></span>
+            </a>
+            <div class="dropdown">
+                <!-- <button onclick="toggleDropdown()"
+                    class="dropbtn border rounded-circle p-2 icon-btn">
+                    <span class="bi bi-gear"></span>
+                </button> -->
+                <button class="dropbtn border icon-btn rounded-circle p-2 ">
+                    <span style="font-weight: bolder;">⋮</span>
+                </button>
+                <div id="myDropdown" class="dropdown-content">
+                    <a href="#viewcontact">View contact</a>
+                    <a href="#about">Media, links, and docs</a>
+                    <a href="#contact">Search</a>
+                    <a href="#contact">Mute notifications</a>
+                    <a href="#contact">Wallpaper</a>
+                    <a href="#contact">More</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+{% endblock header %}
+
+{% block main %}
+<div class="container my-4">
+    <!-- Chat log with background -->
+    <div class="recent-status-list">
+    <div class="chat-container p-3 rounded shadow-sm" id="chat-log">
+        <!-- Sender message -->
+        <div class="message-row sender">
+            <div class="message-bubble">
+                <p id="chat-log"></p>
+                <span class="message-time">06:50 AM</span>
+            </div>
+        </div>
+        <!-- Receiver message -->
+        <!-- <div class="message-row receiver">
+            <div class="message-bubble">
+                <p>I need assistance with my account.</p>
+                <span class="message-time">06:51 AM</span>
+            </div>
+        </div> -->
+        <!-- Receiver message -->
+        <!-- <div class="message-row receiver">
+            <div class="message-bubble">
+                <p>I need assistance with my account.</p>
+                <span class="message-time">06:51 AM</span>
+            </div>
+        </div> -->
+        <!-- Sender message -->
+        <!-- <div class="message-row sender">
+            <div class="message-bubble">
+                <p>Hello, how can I help you?</p>
+                <span class="message-time">06:50 AM</span>
+            </div>
+        </div> -->
+        <!-- Sender message -->
+        <!-- <div class="message-row sender">
+            <div class="message-bubble">
+                <p>Hello, how can I help you?</p>
+                <span class="message-time">06:50 AM</span>
+            </div>
+        </div> -->
+        <!-- Add more messages as needed -->
+    </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="d-flex align-items-center mt-3">
+        <input type="text" class="form-control me-2 chat-input" placeholder="Type a message" id="chat-message-input">
+        <button class="btn border" id="chat-message-submit">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Inline styling and scripts -->
+<style>
+    .header-content {
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .recent-status-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .icon-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: #333;
+        background-color: #e9ecef;
+        transition: background-color 0.3s;
+    }
+
+    .icon-btn:hover {
+        background-color: #d1d5db;
+    }
+
+    .chat-container {
+        max-height: 500px;
+        overflow-y: auto;
+        /* background-image: url("{% static 'profile_picture/2249644.jpg' %}");*/
+        background-size: cover;
+        background-position: center;
+        border: 1px solid #ddd;
+    }
+
+    .message-row {
+        display: flex;
+        margin: 10px 0;
+    }
+
+    .message-row.sender {
+        justify-content: flex-start;
+    }
+
+    .message-row.receiver {
+        justify-content: flex-end;
+    }
+
+    .message-bubble {
+        max-width: 60%;
+        padding: 10px 15px;
+        border-radius: 20px;
+        position: relative;
+        font-size: 0.9rem;
+        color: #fff;
+    }
+
+    .message-row.sender .message-bubble {
+        background-color: #00a884; /* WhatsApp green */
+        border-top-left-radius: 0;
+    }
+
+    .message-row.receiver .message-bubble {
+        background-color: #005c4b; /* Darker green for receiver */
+        border-top-right-radius: 0;
+    }
+
+    .message-time {
+        display: block;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-align: right;
+        margin-top: 5px;
+    }
+
+    .chat-input {
+        border-radius: 20px;
+        padding: 10px 15px;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: #f1f1f1;
+        min-width: 200px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+</style>
+
+<script>
+    const ws = new WebSocket('ws://127.0.0.1:8000/aws/');
+
+    ws.onopen = function(){
+        console.log("websocket connection open..")
+    }
+
+    ws.onmessage = function(event){
+        console.log("message received from server...", event);
+        console.log("Type of Actual message : " + typeof(event.data));
+        const data = JSON.parse(event.data);
+        console.log("Actual msg : "+ data.message);
+        console.log("After parse Actual msg : "+ typeof(data.message));
+        document.querySelector("#chat-log").innerHTML = data.message;
+    }
+
+    
+    ws.onclose = function(event){
+        console.log("websocket close client side")
+    }
+
+    ws.onerror = function(event){
+        console.log("websocket error occur client side")
+    }
+
+    document.querySelector("#chat-message-submit").onclick = function(event){
+        var message = document.querySelector("#chat-message-input").value;
+        ws.send(JSON.stringify({
+            'message': message
+        }));
+        message.value = '';
+    }
+</script>
+{% endblock main %}

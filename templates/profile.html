@@ -1,0 +1,163 @@
+{% extends "index.html" %}
+{% load myfilter %}
+{% load static %}
+
+{% block header %}
+<nav class="d-flex justify-content-between align-items-center header-content py-3 px-4">
+    <!-- Left section (Logo & Profile) -->
+    <div class="d-flex align-items-center">
+        <h2 class="me-4 site-title">My Liveroom</h2>
+
+        <!-- Profile Section -->
+        <div class="row align-items-center profile-section"
+            style="margin-left: 2rem;">
+            <a href="/profile/"
+                class="profile-link row text-decoration-none">
+                <div class="col-auto text-center">
+                    <img src="{{request.session.pkey|Image}}"
+                        alt="Profile Picture"
+                        class="img-fluid rounded-circle"
+                        style="width: 60px; height: 60px;">
+                </div>
+                <div class="col-auto">
+                    <h5 class="profile-name mb-2">Name :
+                        {{request.session.pkey|Username|title}}</h5>
+                    <div class="profile-last-seen">Phone :
+                        {{request.session.pkey|Userphone}}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Right section (Icons & Dropdown) -->
+    <div class="d-flex align-items-center" style="gap: 10px;">
+        <a href="#" class="icon-btn border rounded-circle p-2 me-2">
+            <span class="bi bi-chat-left-text"></span>
+        </a>
+        <a href="/status/"
+            class="icon-btn border rounded-circle p-2 me-2">
+            <span class="bi bi-disc"></span>
+        </a>
+        <div class="dropdown">
+            <button onclick="toggleDropdown()"
+                class="dropbtn border rounded-circle p-2 icon-btn">
+                <span class="bi bi-gear"></span>
+            </button>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="/group/">New Group</a>
+                <a href="#broadcast">New Broadcast</a>
+                <a href="#devices">Linked Devices</a>
+                <a href="#starred">Starred Messages</a>
+                <a href="#payments">Payments</a>
+                <a href="/settings/">Settings</a>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock header %}
+
+{% block main %}
+
+<div class="container profile-page">
+    <div class="d-flex justify-content-center align-items-center">
+        <img src="{{request.session.pkey|Image}}" alt="Profile Picture"
+            class="profile-picture">
+    </div>
+    <form method="get">
+        <div class="d-flex m-2">
+            <input type="file" name id>
+            <button type="submit"
+                class="btn btn-outline-secondary">Change</button>
+        </div>
+    </form>
+    <div class="profile-info">
+        <div class="input-group">
+            <span>Name:</span>
+            <input type="text" class="form-control"
+                value="{{request.session.pkey|Username|title}}" id="input-name">
+        </div>
+        <div class="input-group">
+            <span>Phone:</span>
+            <span>{{request.session.pkey|Userphone}}</span>
+        </div>
+    </div>
+    <button class="btn btn-danger logout-button">Log out</button>
+</div>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load jQuery for Ajax (Ensure it's above your script block) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    
+</script>
+
+<style>
+    .profile-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        max-width: 400px;
+        margin: auto;
+    }
+
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 20px;
+    }
+
+    .profile-info {
+        width: 100%;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    form input[type="file"] {
+        margin-bottom: 10px;
+    }
+
+    .profile-info .input-group {
+        margin-bottom: 15px;
+    }
+
+    .profile-info span {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .logout-button {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    @media (max-width: 576px) {
+        .profile-page {
+            padding: 15px;
+        }
+
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+        }
+
+        form input[type="file"] {
+            width: 100%;
+        }
+    
+        form button {
+            width: 100%;
+        }
+    }
+</style>
+
+{% endblock main %}

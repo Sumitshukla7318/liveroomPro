@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login with Phone</title>
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 350px;
+            max-width: 90%;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .input-group span {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"] {
+            border: none;
+            outline: none;
+            padding: 10px;
+            flex: 1;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: #f9f9f9;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #3a1c71;
+            color: white;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #0d0122;
+        }
+
+        .otp-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .otp-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 300px;
+        }
+
+        .otp-content input {
+            width: 80%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .otp-content button {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: none;
+            background: #4caf50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .otp-content button:hover {
+            background: #45a049;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+            }
+
+            input[type="text"] {
+                font-size: 0.9rem;
+            }
+
+            button {
+                font-size: 0.9rem;
+            }
+        }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Login with Phone Number</h1>
+            <form method="post" action>
+                {% csrf_token %}
+                <div class="input-group">
+                    <span>+91</span>
+                    <input type="text" placeholder="Enter your phone number"
+                        maxlength="10" required id="mobile_number">
+                </div>
+                <button onclick="showOtpModal()" id="mobile_send">Send
+                    OTP</button>
+            </form>
+        </div>
+
+        <!-- OTP Modal -->
+        <div class="otp-modal" id="otpModal">
+            <div class="otp-content">
+                <form action method="post">
+                    {% csrf_token %}
+                    <h2>Enter OTP</h2>
+                    <input type="text" id="otpInput"
+                        placeholder="Enter 6-digit OTP"
+                        maxlength="6">
+                    <button id="submitOtp">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script
+            src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+        <script>
+        // Function to show the OTP modal
+        function showOtpModal() {
+            document.getElementById('otpModal').style.display = 'flex';
+        }
+
+        // Function to submit the OTP
+        $(document).on('click',"#submitOtp",function(event){
+            event.preventDefault();
+            const otp = document.getElementById('otpInput').value;
+            //console.log(otp);
+            if (otp.length === 6 && !isNaN(otp)) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/checkotp/',
+                    data: {
+                        otp: otp,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(event){
+                        if(event.success){
+                            alert('OTP submitted successfully!');
+                            document.getElementById('otpModal').style.display = 'none';
+                            window.location.href = '/details/';
+                        } else {
+                            alert('Invalid Otp try again...')
+                        }
+                    },
+                    error: function(event){
+                        alert("Something error found!!!")
+                    },
+                });
+            } else {
+                alert('Please enter a valid 6-digit OTP.');
+            }
+        });
+
+        $(document).on('click',"#mobile_send",function(event){
+            event.preventDefault();
+            mobile_number = document.querySelector("#mobile_number").value;
+            $.ajax({
+                type: 'POST',
+                url: '/send_to_mobile/',
+                data: {
+                    mobile_number : mobile_number,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.message) {
+                        alert(otp);
+                  } else {
+                      alert(response.message);
+                      window.location.reload();
+                  }
+                },
+            });
+        });
+    </script>
+    </body>
+</html>
