@@ -6,6 +6,9 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 import random
 from app1.models import Profile,Contact
 from django.views.decorators.csrf import csrf_exempt
+import requests
+import os
+
 # Create your views here.
 
 class Login_Phonenumber_view(View):
@@ -14,14 +17,21 @@ class Login_Phonenumber_view(View):
 
 class Details_view(View):
     def get(self,request):
+        #if user doesn't exist render login page 
+        if 'pkey' not in request.session:
+            return render(request,"login.html")
+        
         return render(request,"details.html")
     def post(self,request):
         pass
     
 class Index_view(View):
     def get(self,request):
+         
+        #if user doesn't exist render login page 
         if 'pkey' not in request.session:
             return render(request,"login.html")
+        
         pkey = request.session.get('pkey')
         data = Contact.objects.filter(reference = pkey).values()
         data = list(data)
@@ -47,6 +57,7 @@ class Index_view(View):
 
 class Status_view(View):
     def get(self,request):
+
         return render(request,"status.html")
     
 class NewGroup_view(View):
@@ -124,10 +135,17 @@ class Personal_Profile_view(View):
     
 class Contact_list_view(View):
     def get(self,request):
+        #if user doesn't exist render login page 
+        if 'pkey' not in request.session:
+            return render(request,"login.html")
+        
         return render(request,"contact_list.html")
     
 class Contact_save_view(View):
     def get(self, request, *args, **kwargs):
+        #if user doesn't exist render login page 
+        if 'pkey' not in request.session:
+            return render(request,"login.html")
         pass
     def post(self, request):
         username = request.POST.get('username')
@@ -139,6 +157,12 @@ class Contact_save_view(View):
                 return JsonResponse({'msg':"Contact Already Exist..."},status=200)
         print(f'{contact} : {username}')
         # Validate and process the form data
+
+        #checking the number that it is exist or not 
+        if not self.isExist(contact):
+            return JsonResponse({'msg':"Your provideed Mobie number is Invalid"})
+
+
         if username and contact and len(contact) == 10:
             # Save the data or perform some action
             try:
@@ -152,6 +176,51 @@ class Contact_save_view(View):
                 return JsonResponse({'msg': 'Something went wrong'}, status=400)       
         else:
             return JsonResponse({'msg': 'Invalid data provided.'}, status=400)
+        
+    import requests
+
+    def isExist(self, contact, country_code=None):
+        access_key = os.getenv('API_ACCESS_KEY')  # Load API key from environment variable
+        api_url = 'http://apilayer.net/api/validate'
+
+        
+
+        # Prepare the parameters for the API request
+        params = {
+            'access_key': access_key,
+            'number': contact,
+            'format': 1  # Request the response in JSON format
+        }
+
+        # If a country code is provided, add it to the parameters
+        if country_code:
+            params['country_code'] = country_code
+        
+        try:
+            # Send GET request to the API
+            response = requests.get(api_url, params=params)
+
+            # If the API call is successful (status code 200)
+            if response.status_code == 200:
+                data = response.json()
+
+                # Check the response from the API
+                if data.get('valid', False):
+                    return True  # The number is valid
+                else:
+                    print(f"Error: {contact} is invalid according to the API.")
+                    return False  # The number is invalid according to the API
+            else:
+                # Handle possible errors with the API request
+                print(f"Error: API request failed with status code {response.status_code}")
+                return False
+
+        except Exception as e:
+            # If there is any issue with making the API request
+            print(f"Error occurred while validating phone number: {e}")
+            return False
+
+
             
     
 class Image_submit_view(View):
