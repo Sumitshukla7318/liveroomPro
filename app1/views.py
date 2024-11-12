@@ -170,6 +170,7 @@ class Contact_save_view(View):
                 obj1 = Profile.objects.get(id = pkey)
                 obj2 = Contact(name=username, contact=contact, reference= obj1)
                 obj2.save()
+                print("contact saved")
                 return JsonResponse({'msg': 'Contact saved successfully!'}, status=200)
             except Exception as e:
                 print(f"Error: {e}")
@@ -183,44 +184,42 @@ class Contact_save_view(View):
         access_key = os.getenv('API_ACCESS_KEY')  # Load API key from environment variable
         api_url = 'http://apilayer.net/api/validate'
 
-        
-
         # Prepare the parameters for the API request
         params = {
             'access_key': access_key,
             'number': contact,
             'format': 1  # Request the response in JSON format
         }
-
-        # If a country code is provided, add it to the parameters
+    
+        # If a country code is provided, use it; otherwise, use the default 'IN'
         if country_code:
             params['country_code'] = country_code
-        
-        try:
-            # Send GET request to the API
-            response = requests.get(api_url, params=params)
+        else:
+            params['country_code'] = 'IN'  # Default country code if none is provided
 
-            # If the API call is successful (status code 200)
+        try:
+        # Send GET request to the API
+            response = requests.get(api_url, params=params)
+    
+        # If the API call is successful (status code 200)
             if response.status_code == 200:
                 data = response.json()
-
-                # Check the response from the API
-                if data.get('valid', False):
-                    return True  # The number is valid
+    
+                # Check if the number is valid and its line type is mobile
+                if data.get('valid')==True and data.get('line_type') == 'mobile':
+                    return True  # The number is valid and mobile
                 else:
-                    print(f"Error: {contact} is invalid according to the API.")
-                    return False  # The number is invalid according to the API
+                    print(f"Error: {contact} is invalid or not a mobile number according to the API.")
+                    return False  # The number is invalid or not a mobile number
             else:
                 # Handle possible errors with the API request
                 print(f"Error: API request failed with status code {response.status_code}")
                 return False
 
         except Exception as e:
-            # If there is any issue with making the API request
-            print(f"Error occurred while validating phone number: {e}")
-            return False
-
-
+        # If there is any issue with making the API request
+               print(f"Error occurred while validating phone number: {e}")
+               return False
             
     
 class Image_submit_view(View):
